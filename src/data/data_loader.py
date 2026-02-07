@@ -74,7 +74,7 @@ def load_transaction_data(
                     df[col] = pd.to_datetime(df[col])
                     df[f'{col}_hour'] = df[col].dt.hour
                     df[f'{col}_day'] = df[col].dt.dayofweek
-                except:
+                except (ValueError, TypeError, pd.errors.ParserError):
                     pass  # Keep original if conversion fails
     
     # Ensure we have required columns for graph construction
