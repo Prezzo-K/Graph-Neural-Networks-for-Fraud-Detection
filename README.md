@@ -4,7 +4,7 @@ This is a group project in fulfillment of CSCI 3834, Winter 2026.
 ## Milestones and Task Ownership (Draft)
 This section is the shared milestone record for the team. Each milestone can be mirrored as a GitHub milestone with its tasks tracked as issues.
 
-### Milestone 1: Project setup and dataset audit
+### Milestone 1: Project setup and dataset audit - Status: Completed
 - **Lead (Abdi):** Confirm scope, define success metrics, and verify dataset availability.  
   - *How:* Review the proposal, map dataset columns to objectives, and select evaluation metrics (e.g., AUC-PR, F1).
   - *Deliverable:* Scope/metrics note and dataset inventory checklist.
