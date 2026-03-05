@@ -1,21 +1,41 @@
 # Graph-Neural-Networks-for-Fraud-Detection
 This is a group project in fulfillment of CSCI 3834, Winter 2026.
 
+## Work Completed to Date (as of March 5, 2026)
+
+### Abdi (Prezzo-K) — Completed Contributions
+- ✅ **Initial repository setup** (Feb 7, 2026): Created the full project folder structure (`data/`, `notebooks/`, `experiments/`, `src/`, `utils/`, `tests/`, `results/`), initial README, and `.gitignore`.
+- ✅ **Milestone planning and documentation** (Feb 8, 2026): Drafted the four-milestone project plan with task ownership and deliverables for all team members.
+- ✅ **Milestone 1 scope and metrics** (Feb 8–12, 2026): Confirmed project scope, defined success metrics (AUC-PR, F1), verified dataset availability, and updated milestone status.
+- ✅ **Classical ML experiments** (Mar 5, 2026): Added and expanded `notebooks/Traditional_ML.ipynb` with experiments for Random Forest, Extra Trees, XGBoost, Logistic Regression, and Support Vector Machine (SVM).
+- ✅ **Notebook organization** (Mar 5, 2026): Moved the EDA notebook into the `notebooks/` directory for consistent project layout.
+- ✅ **PR management**: Reviewed and merged all team pull requests (#4 requirements, #5 EDA, #6 Phase 1 experiments, #7 Random Forest, #8 additional ML experiments).
+
+### Team Progress Summary
+| Milestone | Status | Key Deliverables Done |
+|---|---|---|
+| 1 — Project setup & dataset audit | ✅ Completed | Repo structure, EDA notebook, requirements.txt |
+| 2 — Graph construction & baseline models | 🔄 In Progress | Traditional ML notebook (RF, ET, XGB, LR, SVM) |
+| 3 — GNN modeling & evaluation | ⏳ Not Started | — |
+| 4 — Analysis, visualization & final report | ⏳ Not Started | — |
+
+---
+
 ## Milestones and Task Ownership (Draft)
 This section is the shared milestone record for the team. Each milestone can be mirrored as a GitHub milestone with its tasks tracked as issues.
 
-### Milestone 1: Project setup and dataset audit - Status: Completed
+### Milestone 1: Project setup and dataset audit — ✅ Completed
 - **Lead (Abdi):** Confirm scope, define success metrics, and verify dataset availability.  
   - *How:* Review the proposal, map dataset columns to objectives, and select evaluation metrics (e.g., AUC-PR, F1).
-  - *Deliverable:* Scope/metrics note and dataset inventory checklist.
+  - *Deliverable:* Scope/metrics note and dataset inventory checklist. ✅
 - **Bhabin:** Perform initial EDA, summarize feature distributions, and note data quality issues.  
   - *How:* Use pandas to profile missing values, fraud ratios, outliers, and timestamp coverage.
-  - *Deliverable:* EDA notebook with summary tables/plots.
+  - *Deliverable:* EDA notebook with summary tables/plots. ✅ (`notebooks/Fraud_detection_dataset_EDA.ipynb`)
 - **Aaron:** Set up the repo structure for data, notebooks, and results; document environment setup steps.  
   - *How:* Align folders to the workflow and list required packages and setup steps in README or notes.
-  - *Deliverable:* Updated setup checklist and repository structure overview.
+  - *Deliverable:* Updated setup checklist and repository structure overview. ✅ (`requirements.txt`)
 
-### Milestone 2: Graph construction and baseline models
+### Milestone 2: Graph construction and baseline models — 🔄 In Progress
 - **Lead (Abdi):** Define the graph schema (nodes/edges) and feature engineering plan.  
   - *How:* Specify node/edge types, timestamps, categorical encodings, and aggregation rules.
   - *Deliverable:* Graph schema diagram or table plus feature list.
@@ -24,9 +44,9 @@ This section is the shared milestone record for the team. Each milestone can be 
   - *Deliverable:* Preprocessing script/notebook with saved split indices.
 - **Aaron:** Train and evaluate baseline traditional ML models (e.g., logistic regression, random forest).  
   - *How:* Use scikit-learn pipelines, handle class imbalance, and report baseline metrics.
-  - *Deliverable:* Baseline metrics table and model comparison notes.
+  - *Deliverable:* Baseline metrics table and model comparison notes. ✅ (`notebooks/Traditional_ML.ipynb`)
 
-### Milestone 3: GNN modeling and evaluation
+### Milestone 3: GNN modeling and evaluation — ⏳ Not Started
 - **Lead (Abdi):** Implement the GNN model and training loop with PyTorch Geometric.  
   - *How:* Select architecture (GCN/GAT), add class imbalance handling, and define early-stopping criteria.
   - *Deliverable:* Training script/config and saved checkpoints.
@@ -37,7 +57,7 @@ This section is the shared milestone record for the team. Each milestone can be 
   - *How:* Compute AUC-PR/ROC, confusion matrix, and aggregate results for comparison.
   - *Deliverable:* Evaluation summary with plots/tables.
 
-### Milestone 4: Analysis, visualization, and final report
+### Milestone 4: Analysis, visualization, and final report — ⏳ Not Started
 - **Lead (Abdi):** Lead comparative analysis and finalize conclusions.  
   - *How:* Synthesize model comparisons, highlight insights, and document limitations.
   - *Deliverable:* Final analysis narrative and conclusions section.
