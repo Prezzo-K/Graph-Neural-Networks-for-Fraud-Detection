@@ -1,16 +1,6 @@
 # Graph-Neural-Networks-for-Fraud-Detection
 This is a group project in fulfillment of CSCI 3834, Winter 2026.
 
-## Work Completed to Date (as of March 5, 2026)
-
-### Abdi (Prezzo-K) — Completed Contributions
-- ✅ **Initial repository setup** (Feb 7, 2026): Created the full project folder structure (`data/`, `notebooks/`, `experiments/`, `src/`, `utils/`, `tests/`, `results/`), initial README, and `.gitignore`.
-- ✅ **Milestone planning and documentation** (Feb 8, 2026): Drafted the four-milestone project plan with task ownership and deliverables for all team members.
-- ✅ **Milestone 1 scope and metrics** (Feb 8–12, 2026): Confirmed project scope, defined success metrics (AUC-PR, F1), verified dataset availability, and updated milestone status.
-- ✅ **Classical ML experiments** (Mar 5, 2026): Added and expanded `notebooks/Traditional_ML.ipynb` with experiments for Random Forest, Extra Trees, XGBoost, Logistic Regression, and Support Vector Machine (SVM).
-- ✅ **Notebook organization** (Mar 5, 2026): Moved the EDA notebook into the `notebooks/` directory for consistent project layout.
-- ✅ **PR management**: Reviewed and merged all team pull requests (#4 requirements, #5 EDA, #6 Phase 1 experiments, #7 Random Forest, #8 additional ML experiments).
-
 ### Team Progress Summary
 | Milestone | Status | Key Deliverables Done |
 |---|---|---|
