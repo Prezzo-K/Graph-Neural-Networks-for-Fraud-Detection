@@ -1,26 +1,26 @@
 # Core
-python-dotenv==1.0.1
+python-dotenv
 
 # Data & utilities
-pandas==2.2.2
-numpy==1.26.4
-scikit-learn==1.5.1
-scipy==1.13.1
+pandas
+numpy
+scikit-learn
+scipy
 
 # Visualization
-matplotlib==3.9.0
-seaborn==0.13.2
+matplotlib
+seaborn
 
 # Deep learning & GNNs
-torch==2.3.1
-torchvision==0.18.1
-torchaudio==2.3.1
-torch-geometric==2.7.0
+torch
+torchvision
+torchaudio
+torch-geometric
 
-# Experiment tracking / config (optional but nice)
-pyyaml==6.0.2
-tqdm==4.66.5
+# Experiment tracking / config
+pyyaml
+tqdm
 
 # Notebooks
-jupyterlab==4.2.3
-ipykernel==6.29.5
+jupyterlab
+ipykernel
