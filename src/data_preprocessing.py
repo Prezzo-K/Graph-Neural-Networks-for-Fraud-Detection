@@ -12,9 +12,11 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     print(f"Loading data from {csv_path}...")
     df = pd.read_csv(csv_path)
 
-    # 1. Temporal Feature Engineering
-    print("Engineering temporal features...")
+    # 1. Temporal Feature Engineering and Sorting
+    print("Engineering temporal features and sorting by timestamp...")
     df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+    df = df.sort_values('Timestamp').reset_index(drop=True)
+    
     df['Hour'] = df['Timestamp'].dt.hour
     df['DayOfWeek'] = df['Timestamp'].dt.dayofweek
     df['Month'] = df['Timestamp'].dt.month
@@ -69,13 +71,28 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     cat_indices = df['Merchant_Category'].map(cat_map).values
     txn_indices = np.arange(len(df))
 
-    # 5. Build HeteroData Object
-    print("Building HeteroData object...")
+    # 5. Build HeteroData Object and Create Temporal Masks
+    print("Building HeteroData object and creating temporal masks...")
+    num_transactions = len(df)
+    train_end = int(0.7 * num_transactions)
+    val_end = int(0.85 * num_transactions)
+
+    train_mask = torch.zeros(num_transactions, dtype=torch.bool)
+    val_mask = torch.zeros(num_transactions, dtype=torch.bool)
+    test_mask = torch.zeros(num_transactions, dtype=torch.bool)
+
+    train_mask[:train_end] = True
+    val_mask[train_end:val_end] = True
+    test_mask[val_end:] = True
+
     data = HeteroData()
 
     # Add Nodes
     data['transaction'].x = torch.from_numpy(transaction_features)
     data['transaction'].y = torch.from_numpy(labels)
+    data['transaction'].train_mask = train_mask
+    data['transaction'].val_mask = val_mask
+    data['transaction'].test_mask = test_mask
     
     # Other nodes (initialized with identity or just count)
     # Using a simple range-based feature or identity if needed; 
