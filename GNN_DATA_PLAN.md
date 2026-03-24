@@ -51,3 +51,8 @@ Structure the CSV dataset into a PyTorch Geometric `HeteroData` object to enable
 *   **Class Imbalance**: Fraud cases are likely a minority; we may need weighted loss or oversampling in the GNN training loop.
 *   **Memory**: While 50k nodes is small, the number of relations can grow; `HeteroData` is the efficient way to handle this.
 *   **Temporal Splits**: Ensure the train/test split respects time (don't train on future data to predict the past).
+
+## Improvements
+*   Replace random node features with nn.Embedding (learnable)
+*   Add device nodes (captures device-sharing fraud)
+*   Add edge attributes (temporal patterns)
