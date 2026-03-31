@@ -1,0 +1,24 @@
+GNN Models Performance
+======================
+
+Model: SAGE (GraphSAGE)
+  F1-Score:  0.4029
+  Precision: 0.3205
+  Recall:    0.5422
+  AUC-ROC:   0.4927
+  AUC-PR:    0.3165
+-----------------------------------
+Model: GAT
+  F1-Score:  0.4633
+  Precision: 0.3282
+  Recall:    0.7873
+  AUC-ROC:   0.5141
+  AUC-PR:    0.3354
+-----------------------------------
+Model: HGT
+  F1-Score:  0.4017
+  Precision: 0.3214
+  Recall:    0.5357
+  AUC-ROC:   0.4914
+  AUC-PR:    0.3153
+-----------------------------------
