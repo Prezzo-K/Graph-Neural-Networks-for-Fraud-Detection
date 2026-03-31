@@ -74,7 +74,7 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
     # ── Training loop ─────────────────────────────────────────────────────────
     os.makedirs('models', exist_ok=True)
     os.makedirs('results', exist_ok=True)
-    model_path = f'models/{model_type}_gnn.pt'
+    model_path = f'models/{model_type}_gnn.pth'
 
     best_val_f1 = 0.0
     for epoch in range(1, epochs + 1):
@@ -157,4 +157,4 @@ if __name__ == "__main__":
 
     # ── Save metrics + models already saved per-epoch (best val F1) ───────────
     save_results(results)
-    print("\nModels saved to models/sage_gnn.pt, models/gat_gnn.pt, models/hgt_gnn.pt")
+    print("\nModels saved to models/sage_gnn.pth, models/gat_gnn.pth, models/hgt_gnn.pth")
