@@ -1,0 +1,33 @@
+Traditional ML Models Performance
+=================================
+
+Model: Random Forest Classifier
+  Accuracy:  0.6780
+  F1-Score:  0.0037
+  Precision: 0.3158
+  Recall:    0.0019
+-----------------------------------
+Model: Extra Trees Classifier
+  Accuracy:  0.6738
+  F1-Score:  0.0320
+  Precision: 0.3439
+  Recall:    0.0168
+-----------------------------------
+Model: XGBoost Classifier
+  Accuracy:  0.6608
+  F1-Score:  0.1069
+  Precision: 0.3470
+  Recall:    0.0632
+-----------------------------------
+Model: Logistic Regression
+  Accuracy:  0.6787
+  F1-Score:  0.0000
+  Precision: 0.0000
+  Recall:    0.0000
+-----------------------------------
+Model: SVM Classifier
+  Accuracy:  0.6787
+  F1-Score:  0.0000
+  Precision: 0.0000
+  Recall:    0.0000
+-----------------------------------
