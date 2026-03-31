@@ -1,8 +1,13 @@
+import sys
+import os
+
+# Allow running as either `python src/train.py` or `python -m src.train`
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, average_precision_score
 from src.model import create_model
-import os
 
 
 def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
@@ -59,16 +64,17 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
             m_probs  = probs[mask_np]
 
             return {
-                'f1':     f1_score(m_labels, m_pred, zero_division=0),
-                'prec':   precision_score(m_labels, m_pred, zero_division=0),
-                'rec':    recall_score(m_labels, m_pred, zero_division=0),
+                'f1':      f1_score(m_labels, m_pred, zero_division=0),
+                'prec':    precision_score(m_labels, m_pred, zero_division=0),
+                'rec':     recall_score(m_labels, m_pred, zero_division=0),
                 'auc_roc': roc_auc_score(m_labels, m_probs),
                 'auc_pr':  average_precision_score(m_labels, m_probs),
             }
 
     # ── Training loop ─────────────────────────────────────────────────────────
+    os.makedirs('models', exist_ok=True)
     os.makedirs('results', exist_ok=True)
-    checkpoint_path = f'results/best_{model_type}_model.pt'
+    model_path = f'models/{model_type}_gnn.pt'
 
     best_val_f1 = 0.0
     for epoch in range(1, epochs + 1):
@@ -93,11 +99,11 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
             )
             if m['f1'] > best_val_f1:
                 best_val_f1 = m['f1']
-                torch.save(model.state_dict(), checkpoint_path)
+                torch.save(model.state_dict(), model_path)
 
     # ── Final test evaluation ─────────────────────────────────────────────────
     print(f"\n--- {model_type.upper()} Test Results ---")
-    model.load_state_dict(torch.load(checkpoint_path, weights_only=False))
+    model.load_state_dict(torch.load(model_path, weights_only=False))
     m = evaluate(data['transaction'].test_mask)
     print(f"  F1:      {m['f1']:.4f}")
     print(f"  Prec:    {m['prec']:.4f}")
@@ -108,10 +114,28 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
     return m
 
 
+def save_results(results):
+    """Save all model metrics to results/gnn_results.txt (mirrors traditional ML format)."""
+    results_path = 'results/gnn_results.txt'
+    with open(results_path, 'w') as f:
+        f.write("GNN Models Performance\n")
+        f.write("======================\n\n")
+        for model_name, m in results.items():
+            f.write(f"Model: {model_name.upper()} (GraphSAGE)\n" if model_name == 'sage'
+                    else f"Model: {model_name.upper()}\n")
+            f.write(f"  F1-Score:  {m['f1']:.4f}\n")
+            f.write(f"  Precision: {m['prec']:.4f}\n")
+            f.write(f"  Recall:    {m['rec']:.4f}\n")
+            f.write(f"  AUC-ROC:   {m['auc_roc']:.4f}\n")
+            f.write(f"  AUC-PR:    {m['auc_pr']:.4f}\n")
+            f.write("-" * 35 + "\n")
+    print(f"\nResults saved to {results_path}")
+
+
 if __name__ == "__main__":
     results = {}
 
-    # Run all three models systematically with identical settings
+    # Run all three models with identical settings for fair comparison
     for model_type in ['sage', 'gat', 'hgt']:
         results[model_type] = train(
             model_type=model_type,
@@ -130,3 +154,7 @@ if __name__ == "__main__":
             f"{m['rec']:>8.4f} {m['auc_roc']:>9.4f} {m['auc_pr']:>8.4f}"
         )
     print(f"{'='*65}")
+
+    # ── Save metrics + models already saved per-epoch (best val F1) ───────────
+    save_results(results)
+    print("\nModels saved to models/sage_gnn.pt, models/gat_gnn.pt, models/hgt_gnn.pt")
