@@ -1,19 +1,26 @@
-import torch
-import torch.nn.functional as F
-from torch_geometric.nn import SAGEConv, to_hetero
+from src.graphsage import create_graphsage
+from src.gat import create_gat
+from src.hgt import create_hgt
 
-class GNN(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels):
-        super().__init__()
-        self.conv1 = SAGEConv((-1, -1), hidden_channels)
-        self.conv2 = SAGEConv((-1, -1), out_channels)
 
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        x = self.conv2(x, edge_index)
-        return x
+def create_model(model_type, data, hidden_channels=64, out_channels=1):
+    """
+    Factory function — returns the requested model ready to train.
 
-def create_hetero_model(data, hidden_channels, out_channels):
-    model = GNN(hidden_channels, out_channels)
-    model = to_hetero(model, data.metadata(), aggr='sum')
-    return model
+    All three models expose the same forward interface:
+        model(data.x_dict, data.edge_index_dict)['transaction']  →  (N, 1) logits
+
+    Args:
+        model_type:      'sage' | 'gat' | 'hgt'
+        data:            HeteroData object (needed for metadata and lazy init)
+        hidden_channels: embedding size (default 64)
+        out_channels:    output size, 1 for binary classification
+    """
+    if model_type == 'sage':
+        return create_graphsage(data, hidden_channels, out_channels)
+    elif model_type == 'gat':
+        return create_gat(data, hidden_channels, out_channels)
+    elif model_type == 'hgt':
+        return create_hgt(data, hidden_channels, out_channels)
+    else:
+        raise ValueError(f"Unknown model_type '{model_type}'. Choose: 'sage', 'gat', 'hgt'")

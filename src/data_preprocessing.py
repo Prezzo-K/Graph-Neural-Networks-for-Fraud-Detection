@@ -85,6 +85,53 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     val_mask[train_end:val_end] = True
     test_mask[val_end:] = True
 
+    # 5a. Compute aggregated node features from training data only (no leakage)
+    # Using only train rows ensures val/test labels never influence entity representations.
+    print("Computing entity node features from training data...")
+    train_df = df.iloc[:train_end]
+
+    # User node features: behaviour statistics per user
+    user_agg = train_df.groupby('User_ID').agg(
+        txn_count=('Transaction_Amount', 'count'),
+        avg_amount=('Transaction_Amount', 'mean'),
+        fraud_rate=('Fraud_Label', 'mean'),
+        avg_balance=('Account_Balance', 'mean'),
+        avg_failed=('Failed_Transaction_Count_7d', 'mean'),
+    )
+    # Reindex to match user_map order; cold-start users (test-only) get column means
+    user_feature_matrix = (
+        user_agg.reindex(unique_users)
+        .fillna(user_agg.mean())
+        .values.astype(np.float32)
+    )
+    user_feature_matrix = StandardScaler().fit_transform(user_feature_matrix).astype(np.float32)
+
+    # Location node features: aggregate stats per city
+    loc_agg = train_df.groupby('Location').agg(
+        txn_count=('Transaction_Amount', 'count'),
+        avg_amount=('Transaction_Amount', 'mean'),
+        fraud_rate=('Fraud_Label', 'mean'),
+    )
+    loc_feature_matrix = (
+        loc_agg.reindex(unique_locs)
+        .fillna(loc_agg.mean())
+        .values.astype(np.float32)
+    )
+    loc_feature_matrix = StandardScaler().fit_transform(loc_feature_matrix).astype(np.float32)
+
+    # Merchant category node features: aggregate stats per category
+    cat_agg = train_df.groupby('Merchant_Category').agg(
+        txn_count=('Transaction_Amount', 'count'),
+        avg_amount=('Transaction_Amount', 'mean'),
+        fraud_rate=('Fraud_Label', 'mean'),
+    )
+    cat_feature_matrix = (
+        cat_agg.reindex(unique_cats)
+        .fillna(cat_agg.mean())
+        .values.astype(np.float32)
+    )
+    cat_feature_matrix = StandardScaler().fit_transform(cat_feature_matrix).astype(np.float32)
+
     data = HeteroData()
 
     # Add Nodes
@@ -93,13 +140,11 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     data['transaction'].train_mask = train_mask
     data['transaction'].val_mask = val_mask
     data['transaction'].test_mask = test_mask
-    
-    # Other nodes (initialized with identity or just count)
-    # Using a simple range-based feature or identity if needed; 
-    # many GNNs learn embeddings for these from scratch.
-    data['user'].num_nodes = len(unique_users)
-    data['location'].num_nodes = len(unique_locs)
-    data['merchant_category'].num_nodes = len(unique_cats)
+
+    # Entity nodes now have real aggregated features instead of random/empty placeholders
+    data['user'].x = torch.from_numpy(user_feature_matrix)
+    data['location'].x = torch.from_numpy(loc_feature_matrix)
+    data['merchant_category'].x = torch.from_numpy(cat_feature_matrix)
 
     # Add Edges (Bi-directional is usually better for GNNs)
     # User <-> Transaction
