@@ -18,8 +18,9 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     df = df.sort_values('Timestamp').reset_index(drop=True)
     
     df['Hour'] = df['Timestamp'].dt.hour
-    df['DayOfWeek'] = df['Timestamp'].dt.dayofweek
+    df['Day'] = df['Timestamp'].dt.day
     df['Month'] = df['Timestamp'].dt.month
+    df['DayOfWeek'] = df['Timestamp'].dt.dayofweek
     
     # 2. Define Features
     # Numeric columns to scale
@@ -29,7 +30,7 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     num_cols = [
         'Transaction_Amount', 'Account_Balance', 'Daily_Transaction_Count',
         'Avg_Transaction_Amount_7d', 'Card_Age', 'Transaction_Distance',
-        'Hour', 'DayOfWeek', 'Month'
+        'Hour', 'Day', 'Month', 'DayOfWeek'
     ]
     
     # Categorical columns to One-Hot Encode (for Transaction nodes)
