@@ -23,10 +23,13 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     
     # 2. Define Features
     # Numeric columns to scale
+    # Failed_Transaction_Count_7d is excluded: it near-perfectly predicts fraud
+    # and would dominate the model, making comparison with traditional ML unfair
+    # (the traditional ML notebook drops it for the same reason)
     num_cols = [
         'Transaction_Amount', 'Account_Balance', 'Daily_Transaction_Count',
-        'Avg_Transaction_Amount_7d', 'Failed_Transaction_Count_7d',
-        'Card_Age', 'Transaction_Distance', 'Hour', 'DayOfWeek', 'Month'
+        'Avg_Transaction_Amount_7d', 'Card_Age', 'Transaction_Distance',
+        'Hour', 'DayOfWeek', 'Month'
     ]
     
     # Categorical columns to One-Hot Encode (for Transaction nodes)
@@ -46,8 +49,12 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     df_encoded = pd.get_dummies(df, columns=cat_cols)
     
     # Drop columns that won't be used as features for the Transaction node
-    # Risk_Score is dropped to avoid data leakage as per previous experiments
-    cols_to_drop = ['Transaction_ID', 'User_ID', 'Timestamp', 'Location', 'Merchant_Category', 'Risk_Score', 'Fraud_Label']
+    # Risk_Score: data leakage (derived from fraud label)
+    # Failed_Transaction_Count_7d: near-perfectly predicts fraud, excluded for fair comparison
+    cols_to_drop = [
+        'Transaction_ID', 'User_ID', 'Timestamp', 'Location', 'Merchant_Category',
+        'Risk_Score', 'Failed_Transaction_Count_7d', 'Fraud_Label'
+    ]
     feature_cols = [c for c in df_encoded.columns if c not in cols_to_drop]
     
     transaction_features = df_encoded[feature_cols].values.astype(np.float32)
