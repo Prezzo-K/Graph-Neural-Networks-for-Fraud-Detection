@@ -5,8 +5,8 @@ This is a group project in fulfillment of CSCI 3834, Winter 2026.
 | Milestone | Status | Key Deliverables Done |
 |---|---|---|
 | 1 — Project setup & dataset audit | ✅ Completed | Repo structure, EDA notebook, requirements.txt |
-| 2 — Graph construction & baseline models | 🔄 In Progress | Traditional ML notebook (RF, ET, XGB, LR, SVM) |
-| 3 — GNN modeling & evaluation | ⏳ Not Started | — |
+| 2 — Graph construction & baseline models | ✅ Completed | Preprocessing script, Traditional ML baselines |
+| 3 — GNN modeling & evaluation | 🔄 In Progress | HeteroGNN implemented & trained (Test F1: 0.77) |
 | 4 — Analysis, visualization & final report | ⏳ Not Started | — |
 
 ---
@@ -25,21 +25,21 @@ This section is the shared milestone record for the team. Each milestone can be 
   - *How:* Align folders to the workflow and list required packages and setup steps in README or notes.
   - *Deliverable:* Updated setup checklist and repository structure overview. ✅ (`requirements.txt`)
 
-### Milestone 2: Graph construction and baseline models — 🔄 In Progress
+### Milestone 2: Graph construction and baseline models — ✅ Completed
 - **Lead (Abdi):** Define the graph schema (nodes/edges) and feature engineering plan.  
   - *How:* Specify node/edge types, timestamps, categorical encodings, and aggregation rules.
-  - *Deliverable:* Graph schema diagram or table plus feature list.
+  - *Deliverable:* Graph schema diagram or table plus feature list. ✅ (`GNN_DATA_PLAN.md`)
 - **Bhabin:** Implement data preprocessing steps and build train/validation/test splits.  
   - *How:* Clean timestamps, encode categories, scale numeric features, and create stratified splits.
-  - *Deliverable:* Preprocessing script/notebook with saved split indices.
+  - *Deliverable:* Preprocessing script/notebook with saved split indices. ✅ (`src/data_preprocessing.py`)
 - **Aaron:** Train and evaluate baseline traditional ML models (e.g., logistic regression, random forest).  
   - *How:* Use scikit-learn pipelines, handle class imbalance, and report baseline metrics.
   - *Deliverable:* Baseline metrics table and model comparison notes. ✅ (`notebooks/Traditional_ML.ipynb`)
 
-### Milestone 3: GNN modeling and evaluation — ⏳ Not Started
+### Milestone 3: GNN modeling and evaluation — 🔄 In Progress
 - **Lead (Abdi):** Implement the GNN model and training loop with PyTorch Geometric.  
   - *How:* Select architecture (GCN/GAT), add class imbalance handling, and define early-stopping criteria.
-  - *Deliverable:* Training script/config and saved checkpoints.
+  - *Deliverable:* Training script/config and saved checkpoints. ✅ (`src/model.py`, `src/train.py`)
 - **Bhabin:** Assist with graph data loaders and experiment logging.  
   - *How:* Build PyG datasets, ensure reproducibility (seeds), and log metrics per epoch.
   - *Deliverable:* Data loader module and experiment log template.
