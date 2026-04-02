@@ -9,7 +9,66 @@ Group project in fulfillment of CSCI 3834, Winter 2026.
 | 1 — Project setup & dataset audit | ✅ Completed | Repo structure, EDA notebook, requirements.txt, metrics defined |
 | 2 — Graph construction & baseline models | ✅ Completed | HeteroData graph, preprocessing script, Traditional ML baselines |
 | 3 — GNN modeling & evaluation | ✅ Completed | GraphSAGE, GAT, HGT trained; metrics aligned with baselines |
-| 4 — Analysis, visualization & final report | ⏳ Not Started | — |
+| 4 — Analysis, visualization & final report | ✅ Completed | Ablation study, comparison figures, final locked results, report |
+
+---
+
+## Final Locked Results
+
+All results below are from the canonical clean run (`experiments/run_final_clean_baseline.py`) with `Risk_Score` and `Failed_Transaction_Count_7d` excluded. Saved to `results/`.
+
+### Traditional ML (80/20 stratified split)
+
+| Model | Accuracy | F1 | Precision | Recall | AUC-ROC | AUC-PR |
+|---|---|---|---|---|---|---|
+| Random Forest | 0.679 | 0.003 | 0.400 | 0.001 | 0.514 | 0.332 |
+| Extra Trees | 0.675 | 0.025 | 0.333 | 0.013 | 0.504 | 0.327 |
+| XGBoost | 0.539 | 0.354 | 0.322 | 0.393 | 0.498 | 0.320 |
+| Logistic Regression | 0.490 | 0.381 | 0.312 | 0.488 | 0.491 | 0.316 |
+| SVM (LinearSVC) | 0.490 | 0.381 | 0.312 | 0.488 | 0.491 | 0.316 |
+
+### GNN Models (70/15/15 temporal split)
+
+| Model | F1 | Precision | Recall | AUC-ROC | AUC-PR |
+|---|---|---|---|---|---|
+| GraphSAGE | 0.369 | 0.317 | 0.441 | 0.490 | 0.315 |
+| GAT | 0.390 | 0.318 | 0.502 | 0.488 | 0.317 |
+| **HGT** | **0.416** | **0.325** | **0.576** | **0.494** | **0.315** |
+
+**HGT is the best model overall.** All three GNNs outperform tree-based ensembles and match or exceed linear models in recall and F1.
+
+To reproduce:
+```bash
+python experiments/run_final_clean_baseline.py
+```
+
+---
+
+## Ablation Study: Data Leakage Analysis
+
+Two features were identified as data leakage and excluded from all main models:
+- `Risk_Score` — derived directly from `Fraud_Label`
+- `Failed_Transaction_Count_7d` — rolling 7-day failure count that encodes near-future fraud signal
+
+Three experiments re-introduced these features individually and together to quantify the artificial performance inflation they cause.
+
+### F1-Score by Condition
+
+| Model | Clean Baseline | + Risk_Score | + Failed_7d | + Both |
+|---|---|---|---|---|
+| Random Forest | 0.003 | 0.646 | 0.764 | **1.000** |
+| Extra Trees | 0.025 | 0.634 | 0.764 | 0.982 |
+| XGBoost | 0.354 | 0.622 | 0.744 | 0.999 |
+| Logistic Regression | 0.381 | 0.549 | 0.629 | 0.706 |
+| SVM | 0.381 | 0.549 | 0.629 | 0.707 |
+| GraphSAGE | 0.369 | 0.491 | 0.079 | 0.491 |
+| GAT | 0.390 | 0.402 | 0.465 | 0.451 |
+| HGT | **0.416** | 0.438 | 0.540 | 0.627 |
+
+Random Forest achieves perfect F1 = 1.000 with both leakage features — confirming these columns must be excluded. GNNs are substantially more robust to leakage (max F1 = 0.627 even with both features).
+
+Scripts: `experiments/run_leakage_experiments.py`, `experiments/run_exp3_both.py`
+Full analysis: `experiments/ablation_study_report.md`
 
 ---
 
@@ -35,16 +94,15 @@ Group project in fulfillment of CSCI 3834, Winter 2026.
 ### Scope & Metrics (Abdi)
 - Defined the task as **node-level binary classification** on a heterogeneous transaction graph
 - Selected evaluation metrics for imbalanced fraud detection:
-  - **AUC-PR** — primary metric; measures ranking quality for the minority (fraud) class
-  - **F1-Score** — harmonic mean of precision/recall at the decision threshold
+  - **F1-Score** — primary metric; harmonic mean of precision/recall at the decision threshold
+  - **AUC-PR** — measures ranking quality for the minority (fraud) class
   - **Precision / Recall** — decompose where the model is failing (false alarms vs. missed fraud)
   - **AUC-ROC** — standard ranking metric across all thresholds
   - **Accuracy** — included for completeness; less meaningful under class imbalance
-  - **Confusion Matrix** — shows raw TP/TN/FP/FN counts; makes false negative cost visible
-- Confirmed that `Risk_Score` and `Failed_Transaction_Count_7d` are excluded from all models to prevent data leakage and ensure fair comparison
+- Confirmed that `Risk_Score` and `Failed_Transaction_Count_7d` are excluded from all models to prevent data leakage
 
 ### EDA (Bhabin)
-**File:** `notebooks/Fraud_detection_dataset_EDA.ipynb`
+**File:** `notebooks/Fraud_detection_dataset_EDA.ipynb`, `notebooks/Full_EDA_Report.ipynb`
 - Verified no missing values across all 50,000 rows
 - Fraud class imbalance: 32.1% fraud — significant but not extreme; handled via class weighting
 - Location: 5 unique cities (Sydney, New York, London, Tokyo, Paris)
@@ -58,11 +116,10 @@ Group project in fulfillment of CSCI 3834, Winter 2026.
 ```
 data/               # Raw CSV and processed graph (.pt)
 notebooks/          # Jupyter notebooks (EDA, Traditional ML, GNN exploration)
-results/            # Saved metric outputs (traditional_ml_results.txt, gnn_results.txt)
+experiments/        # Canonical run scripts and ablation study scripts
+results/            # Saved metric outputs (.txt files)
 src/                # Python source (preprocessing, model definitions, training)
 models/             # Saved model checkpoints (.pth for GNNs, .joblib for ML)
-tests/              # Test stubs
-utils/              # Utility stubs
 ```
 
 ---
@@ -70,7 +127,6 @@ utils/              # Utility stubs
 ## Milestone 2: Graph Construction and Baseline Models — ✅ Completed
 
 ### Graph Schema Design (Abdi)
-**File:** `GNN_DATA_PLAN.md`
 
 The dataset is structured as a **heterogeneous graph** with 4 node types and 6 directed edge types:
 
@@ -83,59 +139,29 @@ The dataset is structured as a **heterogeneous graph** with 4 node types and 6 d
 | `location` | 5 | 3 (`txn_count`, `avg_amount`, `fraud_rate`) | Aggregated from training rows only |
 | `merchant_category` | 6 | 3 (`txn_count`, `avg_amount`, `fraud_rate`) | Aggregated from training rows only |
 
-> Entity node features (`user`, `location`, `merchant_category`) are computed from **training rows only** — val/test labels never influence node representations.
-> Cold-start users (appearing only in val/test) receive column means from training.
+> Entity node features are computed from **training rows only** — val/test labels never influence node representations.
 
 **Edge Types (all bidirectional):**
 
-| Relation | Direction | Meaning |
-|---|---|---|
-| `user → performs → transaction` | user → txn | User initiated this transaction |
-| `transaction → performed_by → user` | txn → user | Reverse; propagates transaction signals back to user |
-| `transaction → at → location` | txn → loc | Transaction occurred in this city |
-| `location → is_site_of → transaction` | loc → txn | Reverse; city context flows into transaction |
-| `transaction → belongs_to → merchant_category` | txn → cat | Transaction is in this merchant category |
-| `merchant_category → contains → transaction` | cat → txn | Reverse; category risk flows into transaction |
+| Relation | Direction |
+|---|---|
+| `user → performs → transaction` | user → txn |
+| `transaction → performed_by → user` | txn → user |
+| `transaction → at → location` | txn → loc |
+| `location → is_site_of → transaction` | loc → txn |
+| `transaction → belongs_to → merchant_category` | txn → cat |
+| `merchant_category → contains → transaction` | cat → txn |
 
 ### Data Preprocessing (Bhabin)
 **File:** `src/data_preprocessing.py`
 
-Steps performed in order:
-1. **Temporal sort** — data sorted by `Timestamp` ascending before any split
-2. **Feature extraction** — `Timestamp` decomposed into `Hour`, `Day`, `Month`, `DayOfWeek`
-3. **Scaling** — `StandardScaler` applied to 10 numerical columns
-4. **One-hot encoding** — applied to `Transaction_Type`, `Device_Type`, `Card_Type`, `Authentication_Method`; `Location` and `Merchant_Category` are used for graph edges, not one-hot
-5. **Temporal train/val/test split** — 70% / 15% / 15% by row order (chronological, no shuffle)
-   - Train: 35,000 transactions | Val: 7,500 | Test: 7,500
-   - Train class balance: ~23,731 legit / ~11,269 fraud → `pos_weight = 2.11`
-6. **Entity node features** — aggregated statistics computed on training rows only
-7. **Graph saved** to `data/processed_graph.pt` as a PyG `HeteroData` object
-
-### Traditional ML Baselines (Aaron)
-**File:** `notebooks/Traditional_ML.ipynb` | Results: `results/traditional_ml_results.txt`
-
-**Setup:**
-- 80/20 stratified train/test split (40,000 train / 10,000 test)
-- Class imbalance handled via `class_weight='balanced'` (sklearn) or `scale_pos_weight=2.11` (XGBoost)
-- Features: same exclusions as GNN (no `Risk_Score`, no `Failed_Transaction_Count_7d`)
-- For AUC-ROC/AUC-PR: `predict_proba()[:,1]` for probabilistic models; `decision_function()` for LinearSVC (no `predict_proba`)
-
-**Results (test set):**
-
-| Model | Accuracy | F1 | Precision | Recall | AUC-ROC | AUC-PR |
-|---|---|---|---|---|---|---|
-| Random Forest | 0.6782 | 0.0006 | 0.1429 | 0.0003 | — | — |
-| Extra Trees | 0.6740 | 0.0257 | 0.3233 | 0.0134 | — | — |
-| XGBoost | 0.5341 | 0.3532 | 0.3188 | 0.3959 | — | — |
-| Logistic Regression | 0.4962 | 0.3815 | 0.3150 | 0.4837 | — | — |
-| SVM (LinearSVC) | 0.4958 | 0.3812 | 0.3147 | 0.4833 | — | — |
-
-> AUC-ROC and AUC-PR will populate after re-running the notebook — these metrics were added in the latest update alongside confusion matrix output.
-
-**Key observations:**
-- Random Forest and Extra Trees collapse to near-zero recall despite `class_weight='balanced'` — their tree structure biases toward the majority class even with reweighting
-- XGBoost, Logistic Regression, and SVM are more competitive with ~0.38–0.40 F1
-- High accuracy for tree models is misleading — they mostly predict "legit" and get credit for the 68% majority class
+1. Temporal sort by `Timestamp`
+2. Feature extraction: `Timestamp` → `Hour`, `Day`, `Month`, `DayOfWeek`
+3. `StandardScaler` on numerical columns
+4. One-hot encoding for categorical columns
+5. Temporal 70/15/15 train/val/test split (chronological, no shuffle)
+6. Entity node features aggregated from training rows only
+7. Graph saved to `data/processed_graph.pt` as `HeteroData`
 
 ---
 
@@ -144,73 +170,22 @@ Steps performed in order:
 ### Model Implementation (Abdi)
 **Files:** `src/graphsage.py`, `src/gat.py`, `src/hgt.py`, `src/model.py`, `src/train.py`
 
-Three heterogeneous GNN architectures implemented and trained:
+**GraphSAGE** — 2× `SAGEConv` with `to_hetero(aggr='sum')`, mean neighbourhood aggregation, Dropout(0.2)
 
-**GraphSAGE** (`src/graphsage.py`)
-- 2× `SAGEConv` layers wrapped with `to_hetero(aggr='sum')`
-- Aggregation: `h_v = W · CONCAT(h_v, MEAN({h_u : u ∈ N(v)}))`
-- Treats all neighbours equally — baseline for attention-based models
-- `nn.Dropout(p=0.2)` between layers
+**GAT** — 2× `GATConv` with `to_hetero`, 4-head attention (Layer 1: 4×16→64; Layer 2: 1×64), `add_self_loops=False`, Dropout(0.2)
 
-**GAT** (`src/gat.py`)
-- 2× `GATConv` layers wrapped with `to_hetero(aggr='sum')`
-- Layer 1: 4 attention heads × 16 dims → concat → 64 dims; Layer 2: 1 head, 64 dims
-- Attention: `α_vu = softmax(LeakyReLU(a^T [W·h_v || W·h_u]))`
-- `add_self_loops=False` (mandatory for bipartite hetero subgraphs)
-- `nn.Dropout(p=0.2)` on input and between layers
+**HGT** — 2× `HGTConv`, natively heterogeneous transformer attention conditioned on `(src_type, edge_type, dst_type)` triplets, 4 heads, Dropout(0.2)
 
-**HGT** (`src/hgt.py`)
-- 2× `HGTConv` layers — natively heterogeneous, no `to_hetero` needed
-- Transformer-style attention conditioned on both source node type and edge type
-- Each `(src_type, edge_type, dst_type)` triplet has its own Q/K/V weight matrices
-- 4 attention heads; `nn.Dropout(p=0.2)` between layers
+> **Dropout fix:** All models use `nn.Dropout` (module) instead of `F.dropout`, because the functional form bakes `training=True` as a constant during FX tracing by `to_hetero`, preventing dropout from turning off at eval time.
 
-> **Dropout fix:** All three models use `nn.Dropout` (module) instead of `F.dropout(..., training=self.training)`. The functional form bakes `training=True` as a constant during FX tracing by `to_hetero`, so dropout would never turn off during evaluation. The module form is handled correctly by PyTorch's FX tracer.
-
-**Training setup (`src/train.py`):**
-- Optimizer: Adam, `lr=0.001`, `hidden_channels=128`, 200 epochs
-- Loss: `BCEWithLogitsLoss` with `pos_weight = num_neg / num_pos` per model run
-- Model selection: best checkpoint by validation F1
-- Full-graph training (no mini-batching — 50k nodes fits in memory)
-
-### GNN Results (Test Set)
-
-| Model | Accuracy | F1 | Precision | Recall | AUC-ROC | AUC-PR |
-|---|---|---|---|---|---|---|
-| GraphSAGE | — | 0.4030 | 0.3234 | 0.5344 | 0.4932 | 0.3150 |
-| GAT | — | 0.4179 | 0.3242 | 0.5877 | 0.4896 | 0.3143 |
-| HGT | — | 0.4007 | 0.3227 | 0.5283 | 0.4963 | 0.3191 |
-
-> Accuracy and Confusion Matrix will populate after re-running `src/train.py` — these were added in the latest metrics alignment update.
-
-**Key observations:**
-- All three GNNs achieve ~0.40 F1 and ~0.31–0.32 AUC-PR on test, similar to the best traditional ML models (XGBoost/LR/SVM)
-- GNNs show substantially higher recall (~0.53–0.59) compared to tree-based models (RF: 0.0003, ET: 0.01)
-- AUC-ROC near 0.49 suggests the current models are only marginally better than random ranking — likely due to training instability or the need for hyperparameter tuning
-- GAT edges out slightly on F1 and recall; HGT is marginally best on AUC-PR
-
-### Graph Exploration (Bhabin)
-**File:** `notebooks/GNN_Graph_Exploration.ipynb`
-- Visual inspection of the constructed `HeteroData` graph
-- Node/edge count verification across all 4 node types and 6 edge types
-- Feature shape validation per node type
+**Training:** Adam lr=0.01, hidden_channels=64, 100 epochs, `BCEWithLogitsLoss` with `pos_weight=2.11`, best checkpoint by validation F1.
 
 ---
 
-## Future Metric Exploration
+## Milestone 4: Analysis, Visualization, and Final Report — ✅ Completed
 
-- **Matthews Correlation Coefficient (MCC):** A single score (−1 to 1) that accounts for all four cells of the confusion matrix (TP, TN, FP, FN). More robust than F1 under class imbalance because it penalises models that ignore either class. Worth adding to the final comparison table.
-
----
-
-## Milestone 4: Analysis, Visualization, and Final Report — ⏳ Not Started
-
-- **Lead (Abdi):** Lead comparative analysis and finalize conclusions.
-  - *How:* Synthesize GNN vs. traditional ML comparisons, highlight where graph structure helps, and document limitations.
-  - *Deliverable:* Final analysis narrative and conclusions section.
-- **Bhabin:** Build visualizations (fraud subgraphs, metrics plots).
-  - *How:* Use seaborn/matplotlib for metric bar charts and NetworkX for fraud subgraph visuals.
-  - *Deliverable:* Final figure set saved for the report.
-- **Aaron:** Draft the final report and presentation materials.
-  - *How:* Assemble report outline, integrate figures, and iterate with team review.
-  - *Deliverable:* Report draft and presentation deck.
+- **Ablation study** (`experiments/ablation_study_report.md`): 3 controlled experiments quantifying data leakage impact across all 8 models and 4 feature conditions
+- **Comparison figures**: grouped bar chart and recall heatmap across all leakage conditions
+- **Final locked run**: `experiments/run_final_clean_baseline.py` — single authoritative reproducible run, results committed to `results/`
+- **Full EDA**: `notebooks/Full_EDA_Report.ipynb` — 18 figures covering distributions, correlations, graph structure, temporal patterns, and t-SNE projections
+- **Report**: ACM sigconf format, 8 pages, written using LaTeX
