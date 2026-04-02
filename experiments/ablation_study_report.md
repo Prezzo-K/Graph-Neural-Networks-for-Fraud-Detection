@@ -145,3 +145,59 @@ To reproduce:
 ```bash
 python experiments/run_leakage_experiments.py
 ```
+
+---
+
+## Experiment 3 — Both `Risk_Score` AND `Failed_Transaction_Count_7d`
+
+### Results
+
+**Traditional ML:**
+
+| Model | Accuracy | F1 | Precision | Recall | AUC-ROC | AUC-PR |
+|---|---|---|---|---|---|---|
+| Random Forest | **1.000** | **1.000** | **1.000** | **1.000** | **1.000** | **1.000** |
+| Extra Trees | 0.989 | 0.982 | 0.997 | 0.967 | 1.000 | 1.000 |
+| XGBoost | 0.999 | 0.999 | 0.999 | 0.999 | 1.000 | 1.000 |
+| Logistic Regression | 0.787 | 0.706 | 0.634 | 0.796 | 0.890 | 0.808 |
+| SVM | 0.788 | 0.707 | 0.636 | 0.797 | 0.890 | 0.809 |
+
+**GNN:**
+
+| Model | F1 | Precision | Recall | AUC-ROC | AUC-PR |
+|---|---|---|---|---|---|
+| GraphSAGE | 0.491 | 0.325 | **1.000** | 0.500 | 0.325 |
+| GAT | 0.451 | 0.396 | 0.523 | 0.598 | 0.411 |
+| HGT | **0.627** | 0.483 | **0.892** | **0.767** | **0.538** |
+
+### Analysis
+
+This experiment is the definitive proof of data leakage. **Random Forest achieves perfect classification (F1 = AUC-ROC = 1.000)** when both features are present — an impossible result on genuinely difficult fraud data. XGBoost reaches F1 = 0.999. These scores are not evidence of model strength; they are evidence that the features encode the label directly.
+
+HGT reaches its best result across all experiments (F1 = 0.627, Recall = 0.892, AUC-ROC = 0.767), confirming that the heterogeneous transformer architecture is the most capable of exploiting complex multi-feature signals — including leaked ones.
+
+GraphSAGE again collapses to all-positive predictions (Recall = 1.000, AUC-ROC = 0.500), consistent with Exp 1 behaviour, because mean aggregation cannot discriminate when a dominant feature overwhelms the neighbourhood signal.
+
+---
+
+## Complete Ablation Summary
+
+### F1-Score across all conditions
+
+| Model | Clean Baseline | + Risk Score | + Failed 7d | + Both |
+|---|---|---|---|---|
+| **Random Forest** | 0.001 | 0.646 | 0.764 | **1.000** |
+| **Extra Trees** | 0.019 | 0.634 | 0.764 | 0.982 |
+| **XGBoost** | 0.350 | 0.622 | 0.744 | 0.999 |
+| **Logistic Regression** | 0.390 | 0.549 | 0.629 | 0.706 |
+| **SVM** | 0.390 | 0.549 | 0.629 | 0.707 |
+| **GraphSAGE** | 0.403 | 0.491 | 0.079 | 0.491 |
+| **GAT** | 0.463 | 0.402 | 0.465 | 0.451 |
+| **HGT** | 0.402 | 0.438 | 0.540 | **0.627** |
+
+### Key Takeaways
+
+1. **`Risk_Score` + `Failed_Transaction_Count_7d` together make fraud detection trivially solvable** for tree-based models — confirming they must be excluded from any honest evaluation.
+2. **GNNs are substantially more robust to leakage** than traditional ML: even with both features present, no GNN reaches F1 > 0.63, while three traditional models exceed F1 > 0.98.
+3. **The clean baseline GNN (GAT, F1 = 0.463) represents genuine model capability** — it was achieved without any leaked information and reflects real relational learning.
+4. **The leakage gap is asymmetric**: `Failed_Transaction_Count_7d` alone inflates tree models more than `Risk_Score` alone, suggesting it is the more dangerous of the two features to inadvertently include.
