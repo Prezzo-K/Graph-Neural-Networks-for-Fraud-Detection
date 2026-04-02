@@ -6,13 +6,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 import torch.nn.functional as F
-from sklearn.metrics import (f1_score, precision_score, recall_score,
-                             roc_auc_score, average_precision_score,
-                             accuracy_score, confusion_matrix)
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, average_precision_score
 from src.model import create_model
 
 
-def train(model_type='sage', hidden_channels=64, epochs=200, lr=0.001):
+def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
     """
     Train a heterogeneous GNN for fraud detection.
 
@@ -66,13 +64,11 @@ def train(model_type='sage', hidden_channels=64, epochs=200, lr=0.001):
             m_probs  = probs[mask_np]
 
             return {
-                'acc':     accuracy_score(m_labels, m_pred),
                 'f1':      f1_score(m_labels, m_pred, zero_division=0),
                 'prec':    precision_score(m_labels, m_pred, zero_division=0),
                 'rec':     recall_score(m_labels, m_pred, zero_division=0),
                 'auc_roc': roc_auc_score(m_labels, m_probs),
                 'auc_pr':  average_precision_score(m_labels, m_probs),
-                'cm':      confusion_matrix(m_labels, m_pred),
             }
 
     # ── Training loop ─────────────────────────────────────────────────────────
@@ -109,13 +105,11 @@ def train(model_type='sage', hidden_channels=64, epochs=200, lr=0.001):
     print(f"\n--- {model_type.upper()} Test Results ---")
     model.load_state_dict(torch.load(model_path, weights_only=False))
     m = evaluate(data['transaction'].test_mask)
-    print(f"  Accuracy: {m['acc']:.4f}")
-    print(f"  F1:       {m['f1']:.4f}")
-    print(f"  Prec:     {m['prec']:.4f}")
-    print(f"  Recall:   {m['rec']:.4f}")
-    print(f"  AUC-ROC:  {m['auc_roc']:.4f}")
-    print(f"  AUC-PR:   {m['auc_pr']:.4f}")
-    print(f"  Confusion Matrix:\n{m['cm']}")
+    print(f"  F1:      {m['f1']:.4f}")
+    print(f"  Prec:    {m['prec']:.4f}")
+    print(f"  Recall:  {m['rec']:.4f}")
+    print(f"  AUC-ROC: {m['auc_roc']:.4f}")
+    print(f"  AUC-PR:  {m['auc_pr']:.4f}")
 
     return m
 
@@ -129,7 +123,6 @@ def save_results(results):
         for model_name, m in results.items():
             f.write(f"Model: {model_name.upper()} (GraphSAGE)\n" if model_name == 'sage'
                     else f"Model: {model_name.upper()}\n")
-            f.write(f"  Accuracy:  {m['acc']:.4f}\n")
             f.write(f"  F1-Score:  {m['f1']:.4f}\n")
             f.write(f"  Precision: {m['prec']:.4f}\n")
             f.write(f"  Recall:    {m['rec']:.4f}\n")
@@ -146,21 +139,21 @@ if __name__ == "__main__":
     for model_type in ['sage', 'gat', 'hgt']:
         results[model_type] = train(
             model_type=model_type,
-            hidden_channels=128,
-            epochs=200,
-            lr=0.001,
+            hidden_channels=64,
+            epochs=100,
+            lr=0.01,
         )
 
     # ── Comparison table ──────────────────────────────────────────────────────
-    print(f"\n{'='*75}")
-    print(f"{'Model':<8} {'Acc':>7} {'F1':>8} {'Precision':>10} {'Recall':>8} {'AUC-ROC':>9} {'AUC-PR':>8}")
-    print(f"{'-'*75}")
+    print(f"\n{'='*65}")
+    print(f"{'Model':<8} {'F1':>8} {'Precision':>10} {'Recall':>8} {'AUC-ROC':>9} {'AUC-PR':>8}")
+    print(f"{'-'*65}")
     for name, m in results.items():
         print(
-            f"{name.upper():<8} {m['acc']:>7.4f} {m['f1']:>8.4f} {m['prec']:>10.4f} "
+            f"{name.upper():<8} {m['f1']:>8.4f} {m['prec']:>10.4f} "
             f"{m['rec']:>8.4f} {m['auc_roc']:>9.4f} {m['auc_pr']:>8.4f}"
         )
-    print(f"{'='*75}")
+    print(f"{'='*65}")
 
     # ── Save metrics + models already saved per-epoch (best val F1) ───────────
     save_results(results)

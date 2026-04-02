@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, Linear, to_hetero
 
 
@@ -37,14 +37,14 @@ from torch_geometric.nn import SAGEConv, Linear, to_hetero
 class GraphSAGE(torch.nn.Module):
     def __init__(self, hidden_channels=64, out_channels=1, dropout=0.2):
         super().__init__()
-        self.dropout = nn.Dropout(p=dropout)
+        self.dropout = dropout
         self.conv1 = SAGEConv((-1, -1), hidden_channels)
         self.conv2 = SAGEConv((-1, -1), hidden_channels)
         self.classifier = Linear(hidden_channels, out_channels)
 
     def forward(self, x, edge_index):
         x = self.conv1(x, edge_index).relu()
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.conv2(x, edge_index).relu()
         return self.classifier(x)
 

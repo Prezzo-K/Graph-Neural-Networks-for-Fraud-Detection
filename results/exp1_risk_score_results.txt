@@ -1,0 +1,69 @@
+Experiment: Exp 1 — With Risk_Score
+============================================================
+
+Traditional ML Models
+----------------------------------------
+Model: Random Forest
+  Accuracy:  0.8319
+  F1-Score:  0.6457
+  Precision: 1.0000
+  Recall:    0.4768
+  AUC-ROC:   0.7438
+  AUC-PR:    0.7191
+----------------------------------------
+Model: Extra Trees
+  Accuracy:  0.8246
+  F1-Score:  0.6338
+  Precision: 0.9626
+  Recall:    0.4725
+  AUC-ROC:   0.7429
+  AUC-PR:    0.7215
+----------------------------------------
+Model: XGBoost
+  Accuracy:  0.8011
+  F1-Score:  0.6221
+  Precision: 0.7985
+  Recall:    0.5095
+  AUC-ROC:   0.7446
+  AUC-PR:    0.7269
+----------------------------------------
+Model: Logistic Regression
+  Accuracy:  0.6474
+  F1-Score:  0.5492
+  Precision: 0.4660
+  Recall:    0.6685
+  AUC-ROC:   0.7388
+  AUC-PR:    0.7241
+----------------------------------------
+Model: SVM
+  Accuracy:  0.6462
+  F1-Score:  0.5488
+  Precision: 0.4649
+  Recall:    0.6698
+  AUC-ROC:   0.7389
+  AUC-PR:    0.7244
+----------------------------------------
+
+GNN Models
+----------------------------------------
+Model: SAGE
+  F1-Score:  0.4909
+  Precision: 0.3253
+  Recall:    1.0000
+  AUC-ROC:   0.5000
+  AUC-PR:    0.3253
+----------------------------------------
+Model: GAT
+  F1-Score:  0.4019
+  Precision: 0.3628
+  Recall:    0.4504
+  AUC-ROC:   0.5573
+  AUC-PR:    0.3651
+----------------------------------------
+Model: HGT
+  F1-Score:  0.4378
+  Precision: 0.3380
+  Recall:    0.6213
+  AUC-ROC:   0.5141
+  AUC-PR:    0.3308
+----------------------------------------
