@@ -1,0 +1,69 @@
+Experiment: Exp 2 — With Failed_Transaction_Count_7d
+============================================================
+
+Traditional ML Models
+----------------------------------------
+Model: Random Forest
+  Accuracy:  0.8772
+  F1-Score:  0.7638
+  Precision: 1.0000
+  Recall:    0.6178
+  AUC-ROC:   0.8080
+  AUC-PR:    0.8006
+----------------------------------------
+Model: Extra Trees
+  Accuracy:  0.8770
+  F1-Score:  0.7635
+  Precision: 0.9990
+  Recall:    0.6178
+  AUC-ROC:   0.8114
+  AUC-PR:    0.8023
+----------------------------------------
+Model: XGBoost
+  Accuracy:  0.8615
+  F1-Score:  0.7441
+  Precision: 0.9155
+  Recall:    0.6268
+  AUC-ROC:   0.8067
+  AUC-PR:    0.8040
+----------------------------------------
+Model: Logistic Regression
+  Accuracy:  0.7281
+  F1-Score:  0.6288
+  Precision: 0.5601
+  Recall:    0.7168
+  AUC-ROC:   0.8021
+  AUC-PR:    0.8026
+----------------------------------------
+Model: SVM
+  Accuracy:  0.7281
+  F1-Score:  0.6288
+  Precision: 0.5601
+  Recall:    0.7168
+  AUC-ROC:   0.8021
+  AUC-PR:    0.8026
+----------------------------------------
+
+GNN Models
+----------------------------------------
+Model: SAGE
+  F1-Score:  0.0790
+  Precision: 0.3008
+  Recall:    0.0455
+  AUC-ROC:   0.4957
+  AUC-PR:    0.3221
+----------------------------------------
+Model: GAT
+  F1-Score:  0.4652
+  Precision: 0.3871
+  Recall:    0.5828
+  AUC-ROC:   0.5901
+  AUC-PR:    0.3990
+----------------------------------------
+Model: HGT
+  F1-Score:  0.5396
+  Precision: 0.4261
+  Recall:    0.7357
+  AUC-ROC:   0.6637
+  AUC-PR:    0.4574
+----------------------------------------

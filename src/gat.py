@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+import torch.nn.functional as F
 from torch_geometric.nn import GATConv, Linear, to_hetero
 
 
@@ -46,7 +46,7 @@ from torch_geometric.nn import GATConv, Linear, to_hetero
 class GAT(torch.nn.Module):
     def __init__(self, hidden_channels=64, out_channels=1, heads=4, dropout=0.2):
         super().__init__()
-        self.dropout = nn.Dropout(p=dropout)
+        self.dropout = dropout
         # Layer 1: multi-head attention, concat=True (default)
         # output dim = (hidden_channels // heads) * heads = hidden_channels
         self.conv1 = GATConv(
@@ -61,9 +61,9 @@ class GAT(torch.nn.Module):
         self.classifier = Linear(hidden_channels, out_channels)
 
     def forward(self, x, edge_index):
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.conv1(x, edge_index).relu()
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.conv2(x, edge_index).relu()
         return self.classifier(x)
 
