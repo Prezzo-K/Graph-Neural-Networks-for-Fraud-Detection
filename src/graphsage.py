@@ -3,35 +3,14 @@ import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, Linear, to_hetero
 
 
-# ── Why 2 layers? ─────────────────────────────────────────────────────────────
-# Layer 1: each transaction aggregates from its direct neighbours
-#          (the user who made it, the city it happened in, the merchant category)
-# Layer 2: each transaction now also sees other transactions belonging to the
-#          same user — critical for detecting fraud rings and repeat offenders
-# Layer 3+: risks over-smoothing, especially since location has only 5 nodes
-#           (all transactions in London would collapse to the same embedding)
+# Two-layer architecture: Layer 1 aggregates direct neighbours (user, location,
+# merchant category). Layer 2 expands the receptive field so each transaction
+# also sees other transactions by the same user — critical for detecting fraud
+# rings. Three+ layers risk over-smoothing on small entity sets (5 locations).
 #
-# Why hidden_channels=64?
-# Large enough to capture fraud patterns but small enough to avoid overfitting
-# on small entity nodes (5 locations, 6 categories). 128 was tested and showed
-# no consistent gain while being 4× slower.
-#
-# Why a separate Linear classifier?
-# Separates representation learning (conv layers) from classification.
-# Lets the conv layers build rich hidden_channels-dimensional embeddings,
-# then a single linear layer decides fraud vs. not fraud.
-#
-# How SAGEConv works:
-# Aggregates neighbours by computing their MEAN, concatenates that with the
-# node's own features, then applies a linear projection:
-#   h_v = W · CONCAT(h_v,  MEAN({h_u : u ∈ N(v)}))
-#
-# Wrapped with to_hetero → PyG replicates the layers once per
-# (src_type, rel, dst_type) triplet, giving each relation its own weight matrices.
-# aggr='sum' at the to_hetero level: when multiple relation types all write into
-# the same target node type (e.g. user→txn AND location→txn both target txn),
-# their outputs are summed before the next layer.
-# ─────────────────────────────────────────────────────────────────────────────
+# to_hetero replicates the layers once per (src, rel, dst) triplet, giving each
+# relation its own weight matrices. aggr='sum' combines outputs from all
+# relation types targeting the same node type.
 
 
 class GraphSAGE(torch.nn.Module):

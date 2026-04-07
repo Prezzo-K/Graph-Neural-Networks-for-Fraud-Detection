@@ -26,7 +26,6 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
     print(f"  Device: {device}")
     print(f"{'='*50}")
 
-    # ── Load graph ────────────────────────────────────────────────────────────
     data_path = 'data/processed_graph.pt'
     if not os.path.exists(data_path):
         print(f"Error: {data_path} not found. Run src/data_preprocessing.py first.")
@@ -35,21 +34,17 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
     data = torch.load(data_path, weights_only=False)
     data = data.to(device)
 
-    # ── Class imbalance weight ────────────────────────────────────────────────
-    # pos_weight = neg / pos tells BCE to penalise missing a fraud case
-    # proportionally more than flagging a legitimate transaction as fraud.
+    # pos_weight penalises missing fraud proportionally more than false alarms
     train_labels = data['transaction'].y[data['transaction'].train_mask]
     num_pos = (train_labels == 1).sum().item()
     num_neg = (train_labels == 0).sum().item()
     pos_weight = torch.tensor([num_neg / num_pos], device=device)
     print(f"  Train — Legit: {num_neg}, Fraud: {num_pos}, pos_weight: {pos_weight.item():.2f}\n")
 
-    # ── Model + optimiser ─────────────────────────────────────────────────────
     model = create_model(model_type, data, hidden_channels=hidden_channels, out_channels=1)
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    # ── Evaluation helper ─────────────────────────────────────────────────────
     def evaluate(mask):
         model.eval()
         with torch.inference_mode():
@@ -71,7 +66,6 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
                 'auc_pr':  average_precision_score(m_labels, m_probs),
             }
 
-    # ── Training loop ─────────────────────────────────────────────────────────
     os.makedirs('models', exist_ok=True)
     os.makedirs('results', exist_ok=True)
     model_path = f'models/{model_type}_gnn.pth'
@@ -101,7 +95,6 @@ def train(model_type='sage', hidden_channels=64, epochs=100, lr=0.01):
                 best_val_f1 = m['f1']
                 torch.save(model.state_dict(), model_path)
 
-    # ── Final test evaluation ─────────────────────────────────────────────────
     print(f"\n--- {model_type.upper()} Test Results ---")
     model.load_state_dict(torch.load(model_path, weights_only=False))
     m = evaluate(data['transaction'].test_mask)
@@ -135,7 +128,6 @@ def save_results(results):
 if __name__ == "__main__":
     results = {}
 
-    # Run all three models with identical settings for fair comparison
     for model_type in ['sage', 'gat', 'hgt']:
         results[model_type] = train(
             model_type=model_type,
@@ -144,7 +136,6 @@ if __name__ == "__main__":
             lr=0.01,
         )
 
-    # ── Comparison table ──────────────────────────────────────────────────────
     print(f"\n{'='*65}")
     print(f"{'Model':<8} {'F1':>8} {'Precision':>10} {'Recall':>8} {'AUC-ROC':>9} {'AUC-PR':>8}")
     print(f"{'-'*65}")
@@ -155,6 +146,5 @@ if __name__ == "__main__":
         )
     print(f"{'='*65}")
 
-    # ── Save metrics + models already saved per-epoch (best val F1) ───────────
     save_results(results)
     print("\nModels saved to models/sage_gnn.pth, models/gat_gnn.pth, models/hgt_gnn.pth")

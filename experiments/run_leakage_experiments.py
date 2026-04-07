@@ -44,10 +44,6 @@ RESULTS_DIR = 'results'
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Shared helpers
-# ─────────────────────────────────────────────────────────────────────────────
-
 def build_tabular(extra_cols: list[str]):
     """Return (X_train, X_test, y_train, y_test) with extra_cols included."""
     df = pd.read_csv(CSV_PATH)
@@ -322,10 +318,6 @@ def save_results(path: str, exp_name: str, ml_results: dict, gnn_results: dict):
     print(f'\nResults saved to {path}')
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────
-
 EXPERIMENTS = [
     {
         'name':        'Exp 1 — With Risk_Score',
@@ -348,9 +340,7 @@ if __name__ == '__main__':
         print(f'  {name}')
         print(f'{"="*60}')
 
-        # ── Traditional ML ────────────────────────────────────────
         print('\n[Traditional ML]')
-        # For tabular, always_drop is handled inside build_tabular
         always_drop_base = ['Transaction_ID', 'User_ID', 'Timestamp',
                             'Location', 'Merchant_Category']
         df = pd.read_csv(CSV_PATH)
@@ -377,7 +367,6 @@ if __name__ == '__main__':
         X_te = sc.transform(X_te)
         ml_res = run_traditional_ml(X_tr, X_te, y_tr, y_te)
 
-        # ── GNN ───────────────────────────────────────────────────
         print('\n[GNN]')
         graph = build_hetero_graph(extra_col=col)
         gnn_res = {}

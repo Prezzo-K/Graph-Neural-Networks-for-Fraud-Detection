@@ -33,7 +33,6 @@ RANDOM_STATE = 42
 torch.manual_seed(RANDOM_STATE)
 np.random.seed(RANDOM_STATE)
 
-# ── Traditional ML (no leakage) ───────────────────────────────────────────────
 print('='*60)
 print('  FINAL CLEAN BASELINE — Traditional ML')
 print('='*60)
@@ -99,7 +98,6 @@ for name, clf in models.items():
     print(f'    F1 {m["f1"]:.4f} | Prec {m["precision"]:.4f} | '
           f'Rec {m["recall"]:.4f} | AUC-ROC {m["auc_roc"]:.4f}')
 
-# Save traditional ML results
 os.makedirs('results', exist_ok=True)
 with open('results/traditional_ml_results.txt', 'w') as f:
     f.write('Traditional ML Models Performance\n')
@@ -115,7 +113,6 @@ with open('results/traditional_ml_results.txt', 'w') as f:
         f.write('-' * 35 + '\n')
 print('\nSaved: results/traditional_ml_results.txt')
 
-# ── GNN (no leakage) ──────────────────────────────────────────────────────────
 print('\n' + '='*60)
 print('  FINAL CLEAN BASELINE — GNN')
 print('='*60)
@@ -181,7 +178,6 @@ for arch in ['sage', 'gat', 'hgt']:
           f'Prec {test_m["prec"]:.4f} | Rec {test_m["rec"]:.4f} | '
           f'AUC-ROC {test_m["auc_roc"]:.4f} | AUC-PR {test_m["auc_pr"]:.4f}')
 
-# Save GNN results
 with open('results/gnn_results.txt', 'w') as f:
     f.write('GNN Models Performance\n')
     f.write('======================\n\n')
@@ -196,7 +192,6 @@ with open('results/gnn_results.txt', 'w') as f:
         f.write('-' * 35 + '\n')
 print('\nSaved: results/gnn_results.txt')
 
-# ── Summary table ─────────────────────────────────────────────────────────────
 print('\n' + '='*65)
 print(f'{"Model":<28} {"F1":>6} {"Prec":>6} {"Recall":>7} {"AUC-ROC":>8}')
 print('-'*65)

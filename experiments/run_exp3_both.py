@@ -24,8 +24,6 @@ RANDOM_STATE = 42
 RESULTS_FILE = 'results/exp3_both_leakage_results.txt'
 EXTRA_COLS   = ['Risk_Score', 'Failed_Transaction_Count_7d']
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
 def add_temporal(df):
     df['Timestamp'] = pd.to_datetime(df['Timestamp'])
     df['Hour']      = df['Timestamp'].dt.hour
@@ -34,7 +32,6 @@ def add_temporal(df):
     df['DayOfWeek'] = df['Timestamp'].dt.dayofweek
     return df
 
-# ── Traditional ML ────────────────────────────────────────────────────────────
 print('[Traditional ML]')
 df = add_temporal(pd.read_csv(CSV_PATH))
 cat_cols = ['Transaction_Type', 'Device_Type', 'Card_Type', 'Authentication_Method']
@@ -88,7 +85,6 @@ for name, clf in models.items():
         'auc_pr':    average_precision_score(y_te, y_prob),
     }
 
-# ── Build heterogeneous graph with both leakage cols ─────────────────────────
 print('\n[Building graph with both leakage features]')
 df2 = add_temporal(pd.read_csv(CSV_PATH))
 df2 = df2.sort_values('Timestamp').reset_index(drop=True)
@@ -165,7 +161,6 @@ data['location', 'is_site_of', 'transaction'].edge_index    = torch.tensor([loc_
 data['transaction', 'belongs_to', 'merchant_category'].edge_index = torch.tensor([txn_idx, cat_idx], dtype=torch.long)
 data['merchant_category', 'contains', 'transaction'].edge_index   = torch.tensor([cat_idx, txn_idx], dtype=torch.long)
 
-# ── GNN training ──────────────────────────────────────────────────────────────
 print('\n[GNN]')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 data   = data.to(device)
@@ -220,7 +215,6 @@ for arch in ['sage', 'gat', 'hgt']:
     print(f'  {arch.upper()} test | F1 {best_m["f1"]:.4f}  '
           f'Rec {best_m["rec"]:.4f}  AUC-PR {best_m["auc_pr"]:.4f}')
 
-# ── Save ──────────────────────────────────────────────────────────────────────
 os.makedirs('results', exist_ok=True)
 with open(RESULTS_FILE, 'w') as f:
     f.write('Experiment: Exp 3 -- Risk_Score AND Failed_Transaction_Count_7d\n')

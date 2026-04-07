@@ -38,7 +38,6 @@ def preprocess_and_create_graph(csv_path, output_path=None):
         'Transaction_Type', 'Device_Type', 'Card_Type', 'Authentication_Method'
     ]
     
-    # Binary columns (keep as is)
     bin_cols = ['IP_Address_Flag', 'Previous_Fraudulent_Activity', 'Is_Weekend']
 
     # 3. Scaling and Encoding
@@ -46,7 +45,6 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     scaler = StandardScaler()
     df[num_cols] = scaler.fit_transform(df[num_cols])
     
-    # One-hot encoding for the categorical columns
     df_encoded = pd.get_dummies(df, columns=cat_cols)
     
     # Drop columns that won't be used as features for the Transaction node
@@ -149,12 +147,11 @@ def preprocess_and_create_graph(csv_path, output_path=None):
     data['transaction'].val_mask = val_mask
     data['transaction'].test_mask = test_mask
 
-    # Entity nodes now have real aggregated features instead of random/empty placeholders
     data['user'].x = torch.from_numpy(user_feature_matrix)
     data['location'].x = torch.from_numpy(loc_feature_matrix)
     data['merchant_category'].x = torch.from_numpy(cat_feature_matrix)
 
-    # Add Edges (Bi-directional is usually better for GNNs)
+    # Add Edges (bidirectional)
     # User <-> Transaction
     data['user', 'performs', 'transaction'].edge_index = torch.stack([
         torch.from_numpy(user_indices), torch.from_numpy(txn_indices)

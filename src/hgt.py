@@ -3,44 +3,15 @@ import torch.nn.functional as F
 from torch_geometric.nn import HGTConv, Linear
 
 
-# ── Why 2 layers? ─────────────────────────────────────────────────────────────
-# Layer 1: each transaction aggregates from its direct neighbours
-#          (the user who made it, the city it happened in, the merchant category)
-# Layer 2: each transaction now also sees other transactions belonging to the
-#          same user — critical for detecting fraud rings and repeat offenders
-# Layer 3+: risks over-smoothing, especially since location has only 5 nodes
-#           (all transactions in London would collapse to the same embedding)
+# HGTConv is natively heterogeneous: the attention function itself differs per
+# (src_type, edge_type, dst_type) — not just the weights, but the computation.
 #
-# Why hidden_channels=64?
-# Large enough to capture fraud patterns but small enough to avoid overfitting
-# on small entity nodes (5 locations, 6 categories).
+#   SAGE: same aggregation for every relation (different learned weights)
+#   GAT:  attention varies per neighbour, but the same attention function is
+#         shared across relations when wrapped with to_hetero
+#   HGT:  completely separate Q/K/V matrices per relation type
 #
-# How HGTConv works:
-# Transformer-style attention where the attention mechanism explicitly conditions
-# on BOTH the source node type AND the edge type. This means "user→transaction"
-# attention is computed completely differently from "location→transaction"
-# attention — different Q/K/V weight matrices per (src_type, edge_type, dst_type).
-#
-#   h_v = AGG_{τ} ( Σ_{u∈N_τ(v)} Attn(τ, u, v) · MSG(τ, h_u) )
-#   where τ is the relation type
-#
-# Why this is the most expressive for our graph:
-# SAGE:  same aggregation logic for every relation (just different weights)
-# GAT:   attention varies per neighbour, but the attention function is the same
-#        across all relations when wrapped with to_hetero
-# HGT:   attention function itself changes per (src_type, edge_type, dst_type) —
-#        a fundamentally different computation for "user performs transaction" vs
-#        "location is_site_of transaction". Designed specifically for hetero graphs.
-#
-# Does NOT use to_hetero — HGTConv is natively heterogeneous and takes
-# x_dict and edge_index_dict directly. metadata() provides the node/edge type
-# lists so HGT can build the right weight matrices at init time.
-#
-# heads=4: 4 relation-aware attention heads running in parallel.
-#
-# Returns a dict {'transaction': logits} so train.py stays identical across
-# all three models — always access output via ['transaction'].
-# ─────────────────────────────────────────────────────────────────────────────
+# Does not use to_hetero — takes x_dict and edge_index_dict directly.
 
 
 class HGT(torch.nn.Module):
@@ -58,7 +29,6 @@ class HGT(torch.nn.Module):
         x_dict = {k: F.dropout(v, p=self.dropout, training=self.training)
                   for k, v in x_dict.items()}
         x_dict = self.conv2(x_dict, edge_index_dict)
-        # Return as dict so train.py can use ['transaction'] uniformly across all models
         return {'transaction': self.classifier(x_dict['transaction'])}
 
 
