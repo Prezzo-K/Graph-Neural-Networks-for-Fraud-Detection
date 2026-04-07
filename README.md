@@ -190,4 +190,4 @@ The dataset is structured as a **heterogeneous graph** with 4 node types and 6 d
 - **Comparison figures**: grouped bar chart and recall heatmap across all leakage conditions
 - **Final locked run**: `experiments/run_final_clean_baseline.py` — single authoritative reproducible run, results committed to `results/`
 - **Full EDA**: `notebooks/Full_EDA_Report.ipynb` — 18 figures covering distributions, correlations, graph structure, temporal patterns, and t-SNE projections
-- **Report**: ACM sigconf format, 8 pages, written using LaTeX
+- **Report**: ACM sigconf format, 8 pages, written using LaTeX — [`report_submission.pdf`](report_submission.pdf)
