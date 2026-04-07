@@ -6,10 +6,10 @@ Group project in fulfillment of CSCI 3834, Winter 2026.
 ### Team Progress Summary
 | Milestone | Status | Key Deliverables Done |
 |---|---|---|
-| 1 — Project setup & dataset audit | ✅ Completed | Repo structure, EDA notebook, requirements.txt, metrics defined |
-| 2 — Graph construction & baseline models | ✅ Completed | HeteroData graph, preprocessing script, Traditional ML baselines |
-| 3 — GNN modeling & evaluation | ✅ Completed | GraphSAGE, GAT, HGT trained; metrics aligned with baselines |
-| 4 — Analysis, visualization & final report | ✅ Completed | Ablation study, comparison figures, final locked results, report |
+| 1 — Project setup & dataset audit | Completed | Repo structure, EDA notebook, requirements.txt, metrics defined |
+| 2 — Graph construction & baseline models | Completed | HeteroData graph, preprocessing script, Traditional ML baselines |
+| 3 — GNN modeling & evaluation | Completed | GraphSAGE, GAT, HGT trained; metrics aligned with baselines |
+| 4 — Analysis, visualization & final report | Completed | Ablation study, comparison figures, final locked results, report |
 
 ---
 
@@ -89,7 +89,7 @@ Full analysis: `experiments/ablation_study_report.md`
 
 ---
 
-## Milestone 1: Project Setup and Dataset Audit — ✅ Completed
+## Milestone 1: Project Setup and Dataset Audit — Completed
 
 ### Scope & Metrics (Abdi)
 - Defined the task as **node-level binary classification** on a heterogeneous transaction graph
@@ -124,7 +124,7 @@ models/             # Saved model checkpoints (.pth for GNNs, .joblib for ML)
 
 ---
 
-## Milestone 2: Graph Construction and Baseline Models — ✅ Completed
+## Milestone 2: Graph Construction and Baseline Models — Completed
 
 ### Graph Schema Design (Abdi)
 
@@ -165,7 +165,7 @@ The dataset is structured as a **heterogeneous graph** with 4 node types and 6 d
 
 ---
 
-## Milestone 3: GNN Modeling and Evaluation — ✅ Completed
+## Milestone 3: GNN Modeling and Evaluation — Completed
 
 ### Model Implementation (Abdi)
 **Files:** `src/graphsage.py`, `src/gat.py`, `src/hgt.py`, `src/model.py`, `src/train.py`
@@ -182,7 +182,7 @@ The dataset is structured as a **heterogeneous graph** with 4 node types and 6 d
 
 ---
 
-## Milestone 4: Analysis, Visualization, and Final Report — ✅ Completed
+## Milestone 4: Analysis, Visualization, and Final Report — Completed
 
 - **Ablation study** (`experiments/ablation_study_report.md`): 3 controlled experiments quantifying data leakage impact across all 8 models and 4 feature conditions
 - **Comparison figures**: grouped bar chart and recall heatmap across all leakage conditions
