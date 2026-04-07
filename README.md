@@ -77,6 +77,8 @@ Full analysis: `experiments/ablation_study_report.md`
 **File:** `data/Fraud Detection Transactions Dataset.csv`
 **Rows:** 50,000 transactions | **Columns:** 21 | **Fraud rate:** 32.1% (16,067 fraud / 33,933 legit)
 
+Full dataset profile: https://prezzo-k.github.io/Graph-Neural-Networks-for-Fraud-Detection/
+
 | Column Group | Columns |
 |---|---|
 | IDs (dropped) | `Transaction_ID`, `User_ID` |
